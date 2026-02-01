@@ -44,8 +44,8 @@ public class MenuItemController {
     @ResponseStatus(HttpStatus.OK)
     public PaginatedMenuItemResponse getMenuItems(
             @RequestParam(defaultValue = "0") int offset,
-            @RequestParam(defaultValue = "10") int size) {
-        PaginationRequest paginationRequest = PaginationRequest.of(offset, size);
+            @RequestParam(defaultValue = "10") int limit) {
+        PaginationRequest paginationRequest = PaginationRequest.of(offset, limit);
         PaginatedResult result = menuItemUseCase.getMenuItems(paginationRequest);
         List<MenuItemResponse> items = result.items().stream()
                 .map(menuItemContractMapper::fromDomainToResponse)
