@@ -7,38 +7,25 @@ import com.allo.restaurant.menu.domain.PaginatedResult;
 import com.allo.restaurant.menu.domain.PaginationRequest;
 import com.allo.restaurant.menu.exceptions.NotFoundException;
 import com.allo.restaurant.menu.ports.outbound.MenuItemPersistence;
-import com.allo.restaurant.menu.ports.outbound.TimeProvider;
-import com.allo.restaurant.menu.ports.outbound.UuidProvider;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+import static java.time.LocalDateTime.now;
+
 @Repository
+@RequiredArgsConstructor
 public class MongoMenuItemPersistence implements MenuItemPersistence {
 
     private final MongoMenuItemRepository mongoMenuItemRepository;
     private final MongoTemplate mongoTemplate;
     private final MenuItemModelMapper mapper;
-    private final TimeProvider timeProvider;
-    private final UuidProvider uuidProvider;
-
-    public MongoMenuItemPersistence(
-            MongoMenuItemRepository mongoMenuItemRepository, MongoTemplate mongoTemplate,
-            MenuItemModelMapper mapper,
-            TimeProvider timeProvider,
-            UuidProvider uuidProvider) {
-        this.mongoMenuItemRepository = mongoMenuItemRepository;
-        this.mongoTemplate = mongoTemplate;
-        this.mapper = mapper;
-        this.timeProvider = timeProvider;
-        this.uuidProvider = uuidProvider;
-    }
 
     @Override
     public MenuItem save(MenuItem menuItem) {
-        var model = mapper.toModel(menuItem.withCreatedAt(timeProvider.now())
-                .withId(uuidProvider.generateId()));
+        var model = mapper.toModel(menuItem.withCreatedAt(now()));
         return mapper.fromModelToDomain(mongoTemplate.save(model));
     }
 
@@ -48,7 +35,7 @@ public class MongoMenuItemPersistence implements MenuItemPersistence {
         if (model == null) {
             throw new NotFoundException("Menu item not found");
         }
-        model = mapper.toModel(menuItem.withUpdatedAt(timeProvider.now())
+        model = mapper.toModel(menuItem.withUpdatedAt(now())
                 .withCreatedAt(model.createdAt())
                 .withId(menuItem.id()));
         return mapper.fromModelToDomain(mongoTemplate.save(model));
@@ -70,13 +57,13 @@ public class MongoMenuItemPersistence implements MenuItemPersistence {
     public PaginatedResult getMenuItems(PaginationRequest paginationRequest) {
         List<MenuItemModel> allItems = mongoMenuItemRepository.findAll();
         long totalRecords = allItems.size();
-        
+
         List<MenuItem> paginatedItems = allItems.stream()
                 .skip(paginationRequest.offset())
                 .limit(paginationRequest.size())
                 .map(mapper::fromModelToDomain)
                 .toList();
-        
+
         return new PaginatedResult(paginatedItems, totalRecords);
     }
 
