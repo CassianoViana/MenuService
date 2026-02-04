@@ -1,8 +1,8 @@
 package com.allo.restaurant.menu.annotations;
 
+import com.allo.restaurant.menu.containers.MongoDBContextInitializer;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.core.annotation.AliasFor;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 
@@ -16,12 +16,8 @@ import java.lang.annotation.Target;
 @ActiveProfiles("test")
 @SpringBootTest
 @AutoConfigureMockMvc
-@ContextConfiguration(initializers = MongoDBContextInitializer.class)
+@ContextConfiguration(initializers = {MongoDBContextInitializer.class})
 public @interface IntegrationTest {
 
-    @AliasFor(annotation = SpringBootTest.class, attribute = "classes")
-    Class<?>[] testClasses() default {};
 
-    @AliasFor(annotation = SpringBootTest.class, attribute = "webEnvironment")
-    SpringBootTest.WebEnvironment webEnvironment() default SpringBootTest.WebEnvironment.MOCK;
 }
